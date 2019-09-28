@@ -1,0 +1,47 @@
+version: "3.5"
+
+services:
+
+    influxdb:
+        image: influxdb
+        hostname: influxdb
+        container_name: loblab-influxdb
+        restart: "always"
+        volumes:
+            - "/var/lib/loblab/influxdb:/var/lib/influxdb"
+            - "./influxdb:/etc/influxdb"
+        ports:
+            - "127.0.0.1:9928:8086"
+        environment:
+            - INFLUXDB_ADMIN_ENABLED=true
+            - INFLUXDB_ADMIN_USER=admin
+        env_file:
+            - ./.password/influxdb.env
+
+    grafana:
+        image: grafana/grafana
+        hostname: grafana
+        container_name: loblab-grafana
+        restart: "always"
+        volumes:
+            - "/var/lib/loblab/grafana:/var/lib/grafana"
+            - "./grafana:/etc/grafana"
+        depends_on:
+            - influxdb
+        ports:
+            - "9929:3000"
+        env_file:
+            - ./.password/grafana.env
+
+    chronograf:
+        image: chronograf
+        hostname: chronograf
+        container_name: loblab-chronograf
+        restart: "unless-stopped"
+        volumes:
+            - "/var/lib/loblab/chronograf:/var/lib/chronograf"
+        depends_on:
+            - influxdb
+        ports:
+            - "9930:8888"
+
